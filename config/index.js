@@ -11,34 +11,45 @@ module.exports = {
     assetsSubDirectory: 'static',
     assetsPublicPath: '/',
     proxyTable: {
-    "/upload/*":{
-        target:"http://localhost:8001/upload",
-        secure:"false"
-    },
-    "/eniro/*":{
-        target:"http://localhost:8001/eniro",
-        secure:"false"
-    },
-      "/uploaded/*":{
-        target:"http://localhost:8001/uploaded",
-        secure:"false"
+      
+      "/upload/*": {
+        target: "http://localhost:8001/upload",
+        secure: false
+      },
+      "/eniro/*": {
+        target: "http://localhost:8001/eniro",
+        secure: false
+      },
+      "/uploaded/*": {
+        target: "http://localhost:8001/uploaded",
+        secure: false
+      },
+
+      //NEW
+      //Route our front end file upload POST to FastAPI’s /upload log endpoint
+      "/upload-log": {
+        target: "http://localhost:8001",
+        changeOrigin: true,    //ensure host header matches backend
+      },
+
+      //route all other API calls (like chat) under /api/* to FastAPI
+      "/api": {
+        target: "http://localhost:8001",
+        changeOrigin: true,    //same origin for cookies, CORS, etc.
+        secure: false          //allow self-signed / dev certs if needed
       },
     },
 
-    // Various Dev Server settings
-    host: 'localhost', // can be overwritten by process.env.HOST
-    port: 8080, // can be overwritten by process.env.PORT, if port is in use, a free one will be determined
+    //Various Dev Server settings
+    host: '0.0.0.0', //can be overwritten by process.env.HOST
+    port: 8080,        //can be overwritten by process.env.PORT
     autoOpenBrowser: false,
     errorOverlay: true,
     notifyOnErrors: true,
-    poll: false, // https://webpack.js.org/configuration/dev-server/#devserver-watchoptions-
+    poll: false,       //https://webpack.js.org/configuration/dev-server/#devserver-watchoptions-
 
-    // Use Eslint Loader?
-    // If true, your code will be linted during bundling and
-    // linting errors and warnings will be shown in the console.
+    //Use Eslint Loader?
     useEslint: true,
-    // If true, eslint errors and warnings will also be shown in the error overlay
-    // in the browser.
     showEslintErrorsInOverlay: false,
     stats: {
       "errors": true,
@@ -47,23 +58,16 @@ module.exports = {
     /**
      * Source Maps
      */
-
-    // https://webpack.js.org/configuration/devtool/#development
-    devtool: 'eval',
-
-    // If you have problems debugging vue-files in devtools,
-    // set this to false - it *may* help
-    // https://vue-loader.vuejs.org/en/options.html#cachebusting
+    devtool: 'eval',   // https://webpack.js.org/configuration/devtool/#development
     cacheBusting: true,
-
     cssSourceMap: true
   },
 
   build: {
-    // Template for index.html
+    //Template for index.html
     index: path.resolve(__dirname, '../dist/index.html'),
 
-    // Paths
+    //Paths
     assetsRoot: path.resolve(__dirname, '../dist'),
     assetsSubDirectory: 'static',
     assetsPublicPath: './',
@@ -71,22 +75,12 @@ module.exports = {
     /**
      * Source Maps
      */
-
     productionSourceMap: false,
-    // https://webpack.js.org/configuration/devtool/#production
     devtool: 'eval-source-map',
-
-    // Gzip off by default as many popular static hosts such as
-    // Surge or Netlify already gzip all static assets for you.
-    // Before setting to `true`, make sure to:
-    // npm install --save-dev compression-webpack-plugin
     productionGzip: false,
     productionGzipExtensions: ['js', 'css'],
 
-    // Run the build command with an extra argument to
-    // View the bundle analyzer report after build finishes:
-    // `npm run build --report`
-    // Set to `true` or `false` to always turn it on or off
+    // Run build with `--report` to see bundle analyzer report
     bundleAnalyzerReport: process.env.npm_config_report
   }
 }

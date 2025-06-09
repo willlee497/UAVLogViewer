@@ -1,5 +1,5 @@
 <template>
-    <div id='vuewrapper' style="height: 100%;">
+    <div id="vuewrapper" style="height:100%;">
         <template v-if="state.mapLoading || state.plotLoading">
             <div id="waiting">
                 <atom-spinner
@@ -42,7 +42,9 @@
 </template>
 
 <script>
+/* eslint-disable */
 import isOnline from 'is-online'
+import axios from 'axios'
 import Plotly from '@/components/Plotly.vue'
 import CesiumViewer from '@/components/CesiumViewer.vue'
 import Sidebar from '@/components/Sidebar.vue'
@@ -64,24 +66,55 @@ import Vue from 'vue'
 
 export default {
     name: 'Home',
-    created () {
-        this.$eventHub.$on('messagesDoneLoading', this.extractFlightData)
-        this.state.messages = {}
-        this.state.timeAttitude = []
-        this.state.timeAttitudeQ = []
-        this.state.currentTrajectory = []
-        isOnline().then(a => { this.state.isOnline = a })
-    },
-    beforeDestroy () {
-        this.$eventHub.$off('messages')
-    },
+
     data () {
         return {
             state: store,
-            dataExtractor: null
+            dataExtractor: null,
+            selectedFile: null,       //holds the chosen .bin
+            uploading: false,         //upload in progress flag
         }
     },
+    created () {
+        this.$eventHub.$on('messagesDoneLoading', this.extractFlightData)
+        //this.state.messages = {}
+        //this.state.timeAttitude = []
+        //this.state.timeAttitudeQ = []
+        //this.state.currentTrajectory = []
+        isOnline().then(a => { this.state.isOnline = a })
+    },
+    beforeDestroy () {
+        this.$eventHub.$off('messagesDoneLoading', this.extractFlightData)
+    },
     methods: {
+      onFileSelected (event) {
+      this.selectedFile = event.target.files[0]
+    },
+    async uploadLog () {
+      if (!this.selectedFile) return
+      this.uploading = true
+
+      const formData = new FormData()
+      formData.append('file', this.selectedFile)
+
+      try {
+        const resp = await axios.post('/upload-log', formData, {
+          headers: { 'Content-Type': 'multipart/form-data' }
+        })
+        store.currentSessionId = resp.data.session_id
+        store.showMap = false 
+        this.$router.push('/chat')
+        console.log("🎫 session id =", store.currentSessionId) //added
+        this.selectedFile = null
+        store.plotOn         = false
+        console.log('Log uploaded; session_id=', store.currentSessionId)
+      } catch (err) {
+        console.error('Upload failed', err)
+        alert('Log upload failed: ' + err.message)
+      } finally {
+        this.uploading = false
+      }
+    },
         extractFlightData () {
             if (this.dataExtractor === null) {
                 if (this.state.logType === 'tlog') {
@@ -202,10 +235,10 @@ export default {
             // Only set showMap to true if it is available and was previously unavailable
             if (!this.state.mapAvailable) {
                 this.state.mapAvailable = this.state.currentTrajectory.length > 0
-                if (this.state.mapAvailable) {
-                    this.state.showMap = true
-                }
+                if (this.state.mapAvailable) this.state.showMap = true
             }
+
+
         },
 
         generateColorMMap () {
@@ -267,6 +300,16 @@ export default {
 
 <!-- Add "scoped" attribute to limit CSS to this component only -->
 <style scoped>
+    .upload-section {
+        padding: 10px;
+        background: rgba(255, 255, 255, 0.1);
+        display: flex;
+        align-items: center;
+    }
+    .upload-section input { margin-right: 8px; }
+    .upload-section button { margin-right: 8px; }
+
+
 
     .nav-side-menu ul :not(collapsed) .arrow:before,
     .nav-side-menu li :not(collapsed) .arrow:before {

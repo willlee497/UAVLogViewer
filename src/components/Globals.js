@@ -1,7 +1,8 @@
+import Vue from 'vue'
 import '../mavextra/mavextra'
 import '../mavextra/mymavextra'
 
-export const store = {
+export const store = Vue.observable({
     // currentTrajectory: [],
     trajectorySource: '',
     trajectories: {},
@@ -14,6 +15,8 @@ export const store = {
     showRadio: false,
     showMessages: false,
     showDeviceIDs: false,
+    currentSessionId: null, // for chat bot
+    chatHistory: [],
     showAttitude: false,
     showEkfHelper: false,
     flightModeChanges: [],
@@ -65,4 +68,4 @@ export const store = {
     /* global _BUILDDATE_ */
     buildDate: _BUILDDATE_,
     childPlots: []
-}
+})

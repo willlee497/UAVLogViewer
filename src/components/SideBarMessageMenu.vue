@@ -1,60 +1,104 @@
+<!-- eslint-disable -->
 <template>
     <div v-if="hasMessages">
-
         <!--<li v-if="state.plotOn" @click="state.plotOn=!state.plotOn">-->
         <!--<a class="section">-->
         <!--<i class="fas fa-eye-slash fa-lg"></i> Toggle Plot</a>-->
         <!--</li>-->
+        <!-- Presets -->
         <tree-menu
             v-if="Object.keys(availableMessagePresets).length > 0"
             :nodes="availableMessagePresets"
             :label="'Presets'"
             :clean-name="'Presets'"
-            :level="0">
+            :level="0" />
 
-        </tree-menu>
+        
         <li v-b-toggle="'messages'">
             <a class="section">
                 Plot Individual Field
-                <i class="fas fa-caret-down"></i></a>
+                <i class="fas fa-caret-down"></i>
+            </a>
         </li>
+<b-collapse id="messages">
+  <!-- filter input -->
+  <li class="input-li">
+    <input
+      id="filterbox"
+      placeholder=" Type here to filter..."
+      v-model="filter"
+    />
+  </li>
 
-        <b-collapse id="messages">
-            <li class="input-li">
-                <input id="filterbox" placeholder=" Type here to filter..." v-model="filter">
+  <!-- one <li> per message type -->
+  <li
+    v-for="key in Object.keys(messageTypesFiltered).sort()"
+    :key="key"
+    class="type"
+  >
+    <div
+      v-b-toggle="'type' + key"
+      :title="messageDocs[key.split('[')[0]]?.doc || ''"
+    >
+      <a class="section">
+        {{ key }}
+        <span v-if="messageTypes[key].isArray">[...]</span>
+        <i class="expand fas fa-caret-down"></i>
+      </a>
+    </div>
+
+    <!-- collapse for each type -->
+    <b-collapse :id="'type' + key">
+      <!-- one <li> per field -->
+      <li
+        v-for="item in messageTypes[key].complexFields"
+        :key="item.name"
+        @click="toggle(key, item.name)"
+        class="field"
+        :title="messageDocs[key]?.[item.name] || ''"
+        v-if="
+          isPlottable(key, item.name) &&
+          item.name.toLowerCase().includes(filter.toLowerCase())
+        "
+      >
+        <a>
+          {{ item.name }}
+          <span v-if="item.units && item.units !== '?'">
+            ({{ item.units }})
+          </span>
+        </a>
+
+        <a
+          @click="$eventHub.$emit('togglePlot', key + '.' + item.name)"
+          v-if="isPlotted(key, item.name)"
+        >
+          <i class="remove-icon fas fa-trash" title="Remove data"></i>
+        </a>
+      </li>
+    </b-collapse>
+  </li>
+</b-collapse>
+
+        <!-- Chatbot entry -->
+        <li v-b-toggle="'chatbot'">
+            <a class="section">
+              Chatbot
+              <i class="fas fa-caret-down"></i>
+            </a>
+        </li>
+        <b-collapse id="chatbot">
+            <li class="field">
+                 <router-link
+                   to="/chat"
+                   class="chat-button"
+                 >
+                   Open Flight&nbsp;Q&amp;A
+                 </router-link>
             </li>
-            <template v-for="key of Object.keys(this.messageTypesFiltered).sort()">
-                <li class="type" v-bind:key="key">
-                    <div
-                        v-b-toggle="'type' + key"
-                        :title="messageDocs[key.split('[')[0]] ? messageDocs[key.split('[')[0]].doc : ''"
-                    >
-                        <a class="section">{{key}} <span v-if="messageTypes[key].isArray">{{"[...]"}}</span>
-                            <i class="expand fas fa-caret-down"></i></a>
-                    </div>
-                </li>
-                <b-collapse :id="'type' + key" v-bind:key="key+'1'">
-                    <template v-for="item in messageTypes[key].complexFields">
-                        <li @click="toggle(key, item.name)"
-                            class="field"
-                            :title="messageDocs[key] ? messageDocs[key][item.name] : ''"
-                            v-bind:key="key+'.'+item.name"
-                            v-if="isPlottable(key,item.name)
-                                && item.name.toLowerCase().indexOf(filter.toLowerCase()) !== -1">
-                            <a> {{item.name}}
-                                <span v-if="item.units!=='?' && item.units!==''"> ({{item.units}})</span>
-                            </a>
-
-                            <a @click="$eventHub.$emit('togglePlot', field.name)" v-if="isPlotted(key,item.name)">
-                                <i class="remove-icon fas fa-trash" title="Remove data"></i>
-                            </a>
-                        </li>
-                    </template>
-                </b-collapse>
-            </template>
         </b-collapse>
     </div>
 </template>
+
 <script>
 import { store } from './Globals.js'
 import TreeMenu from './widgets/TreeMenu.vue'
@@ -421,6 +465,27 @@ export default {
     }
     i.remove-icon {
         float: right;
+    }
+    .chat-button {
+        display: block;      /* make it fill its <li> horizontally */
+        width: 80%;          /* or whatever width you like */
+        margin: 8px auto;    /* auto left/right to center */
+        text-align: center;
+        padding: 10px 0;
+        border-radius: 9999px;
+        background: #135388;
+        color: #fff;
+        font-weight: bold;
+        cursor: pointer;
+        transition: background .15s;
+    }
+    .chat-button:hover {
+        background-color: #0f4570;
+    }
+    .chat-button:disabled {
+    background-color:#777;
+    cursor:default;
+    opacity:.6;
     }
 
     @media (min-width: 575px) and (max-width: 992px) {

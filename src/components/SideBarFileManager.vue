@@ -28,9 +28,11 @@
     </div>
 </template>
 <script>
+/* eslint-disable indent */
 import VProgress from './SideBarFileManagerProgressBar.vue'
 import Worker from '../tools/parsers/parser.worker.js'
 import { store } from './Globals'
+import axios from 'axios'
 
 import { MAVLink20Processor as MAVLink } from '../libs/mavlink'
 
@@ -150,20 +152,28 @@ export default {
             this.state.file = file.name
             this.state.processStatus = 'Pre-processing...'
             this.state.processPercentage = 100
-            this.file = file
+            const form = new FormData()
+            form.append('file', file)
+            axios.post('/upload-log', form, {
+                headers: { 'Content-Type': 'multipart/form-data' }
+            })
+            .then(resp => {
+                store.currentSessionId = resp.data.session_id
+                store.chatHistory = []
+                this.$router.push('/chat')
+            })
+            .catch(err => {
+                console.error('Upload failed for chat:', err)
+                alert('Log upload failed – see console')
+            })
             const reader = new FileReader()
-            reader.onload = function (e) {
-                const data = reader.result
+            reader.onload = () => {
                 worker.postMessage({
                     action: 'parse',
-                    file: data,
-                    isTlog: (file.name.endsWith('tlog')),
-                    isDji: (file.name.endsWith('txt'))
+                    file: reader.result,
+                    isTlog: file.name.endsWith('tlog'),
+                    isDji: file.name.endsWith('txt')
                 })
-            }
-            this.state.logType = file.name.endsWith('tlog') ? 'tlog' : 'bin'
-            if (file.name.endsWith('.txt')) {
-                this.state.logType = 'dji'
             }
             reader.readAsArrayBuffer(file)
         },

@@ -1,8 +1,10 @@
+/* eslint-disable */
 import Vue from 'vue'
 import Router from 'vue-router'
 // import HelloWorld from '@/components/HelloWorld'
 import Home from '../../src/components/Home.vue'
 import PlotlyPopup from '../../src/components/PlotlyPopup.vue'
+import ChatbotView from '@/views/ChatbotView.vue'
 
 Vue.use(Router)
 
@@ -22,6 +24,7 @@ export default new Router({
             path: '/v/:id',
             name: 'View',
             component: Home
-        }
+        },
+        { path: '/chat', name: 'Chatbot', component: ChatbotView }
     ]
 })
