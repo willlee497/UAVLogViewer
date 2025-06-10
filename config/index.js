@@ -11,11 +11,8 @@ module.exports = {
     assetsSubDirectory: 'static',
     assetsPublicPath: '/',
     proxyTable: {
-      
-      "/upload/*": {
-        target: "http://localhost:8001/upload",
-        secure: false
-      },
+
+
       "/eniro/*": {
         target: "http://localhost:8001/eniro",
         secure: false
@@ -36,7 +33,13 @@ module.exports = {
       "/api": {
         target: "http://localhost:8001",
         changeOrigin: true,    //same origin for cookies, CORS, etc.
-        secure: false          //allow self-signed / dev certs if needed
+        //secure: false          //allow self-signed / dev certs if needed
+      },
+
+      //Route ping endpoint for testing
+      "/ping": {
+        target: "http://localhost:8001",
+        changeOrigin: true,
       },
     },
 

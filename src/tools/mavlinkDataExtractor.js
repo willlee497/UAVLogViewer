@@ -21,7 +21,7 @@ const validGCSs = [
 ]
 
 export class MavlinkDataExtractor {
-    static extractAttitude (messages, source) {
+    static extractAttitude(messages, source) {
         const attitudes = {}
         if ('ATTITUDE' in messages) {
             const attitudeMsgs = messages.ATTITUDE
@@ -37,11 +37,11 @@ export class MavlinkDataExtractor {
         return attitudes
     }
 
-    static extractAttitudeQ (messages, source) {
+    static extractAttitudeQ(messages, source) {
         return {}
     }
 
-    static extractFlightModes (messages) {
+    static extractFlightModes(messages) {
         let modes = []
         if ('HEARTBEAT' in messages) {
             const msgs = messages.HEARTBEAT
@@ -60,7 +60,7 @@ export class MavlinkDataExtractor {
         return modes
     }
 
-    static extractEvents (messages) {
+    static extractEvents(messages) {
         let armedState = []
         if ('HEARTBEAT' in messages) {
             const msgs = messages.HEARTBEAT
@@ -79,7 +79,7 @@ export class MavlinkDataExtractor {
         return armedState
     }
 
-    static extractMission (messages) {
+    static extractMission(messages) {
         const wps = []
         if ('CMD' in messages) {
             const cmdMsgs = messages.CMD
@@ -98,11 +98,11 @@ export class MavlinkDataExtractor {
         return wps
     }
 
-    static extractFences (messages) {
+    static extractFences(messages) {
         return []
     }
 
-    static extractVehicleType (messages) {
+    static extractVehicleType(messages) {
         if ('HEARTBEAT' in messages) {
             for (const i in messages.HEARTBEAT.craft) {
                 if (messages.HEARTBEAT.craft[i] !== undefined) {
@@ -112,14 +112,14 @@ export class MavlinkDataExtractor {
         }
     }
 
-    static extractAttitudeSources (messages) {
+    static extractAttitudeSources(messages) {
         return {
             quaternions: [],
             eulers: ['ATTITUDE']
         }
     }
 
-    static extractTrajectorySources (messages) {
+    static extractTrajectorySources(messages) {
         const sources = []
         if ('GLOBAL_POSITION_INT' in messages) {
             sources.push('GLOBAL_POSITION_INT')
@@ -136,7 +136,7 @@ export class MavlinkDataExtractor {
         return sources
     }
 
-    static extractTrajectory (messages, source) {
+    static extractTrajectory(messages, source) {
         const ret = {}
         if (('GLOBAL_POSITION_INT' in messages) && source === 'GLOBAL_POSITION_INT') {
             const trajectory = []
@@ -271,11 +271,11 @@ export class MavlinkDataExtractor {
         return ret
     }
 
-    static extractDefaultParams (messages) {
+    static extractDefaultParams(messages) {
         return {}
     }
 
-    static extractParams (messages) {
+    static extractParams(messages) {
         const params = []
         const lastValue = {}
         if ('PARAM_VALUE' in messages) {
@@ -303,7 +303,7 @@ export class MavlinkDataExtractor {
         }
     }
 
-    static extractTextMessages (messages) {
+    static extractTextMessages(messages) {
         const texts = []
         if ('STATUSTEXT' in messages) {
             const textMsgs = messages.STATUSTEXT
@@ -314,14 +314,14 @@ export class MavlinkDataExtractor {
         return texts
     }
 
-    static extractNamedValueFloatNames (messages) {
+    static extractNamedValueFloatNames(messages) {
         if ('NAMED_VALUE_FLOAT' in messages) {
             return Array.from(new Set(messages.NAMED_VALUE_FLOAT.name))
         }
         return []
     }
 
-    static extractStartTime (messages) {
+    static extractStartTime(messages) {
         return undefined
     }
 }

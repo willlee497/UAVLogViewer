@@ -8,7 +8,7 @@
     </div>
 
     <!-- conversation -->
-    <ChatMessageList :messages="messages" class="scroll-area"/>
+    <ChatMessageList :messages="messages" :loading="loading" @send-question="onSend" class="scroll-area"/>
 
     <!-- composer -->
     <ChatInput class="composer"
@@ -54,7 +54,7 @@ export default {
     async onSend (text) {
       if (!text) return               // nothing typed
       if (!this.sessionReady) {
-        // shouldn’t happen – ChatInput is disabled – but belt & suspenders
+        // shouldn't happen – ChatInput is disabled – but belt & suspenders
         return alert('⚠️  Please upload a .bin log before asking questions.')
       }
       //store.chatHistory.push({ role:'user', text })
@@ -68,6 +68,7 @@ export default {
       try {
         /* ---------- API CALL ---------- */
         const resp = await axios.post('/api/chat', {
+          flight_id: store.currentSessionId,
           question : text
         })
         /* -------------------------------- */
